@@ -55,8 +55,8 @@ used only for milestone validation when appropriate.
     difference and trapezoidal plastic work.
 
 `utPeridigm_JH2CorrespondenceMaterial` verifies the DataManager field wiring,
-analytical elastic update, and preloaded rigid rotation.  Both CTest targets
-pass.  The pre-existing
+analytical elastic update, preloaded rigid rotation, and four-point affine
+compression.  Both CTest targets pass.  The pre-existing
 `utPeridigm_ElasticMaterial` and `Compression_2x1x1_np1` tests also pass.
 
 ### End-to-end prescribed compression
@@ -82,10 +82,11 @@ floor for near-zero roundoff, Exodiff reported that the files are the same.
 - `JH2_Damage = 1` degrades strength to the fractured surface but does not
   delete Peridigm bonds.  Hydrostatic tensile failure zeros point stress and is
   persistent, but its coupling to bond failure remains a separate milestone.
-- Spatially affine multi-point objectivity, published benchmark curves,
-  experimental calibration, and stabilization sensitivity are not yet
-  complete.  Therefore this milestone establishes software integration and
-  deterministic behavior, not predictive validation for blasting simulations.
+- Plastic-regime objectivity under combined stretch and rotation, formal
+  time-step convergence, published benchmark curves, experimental calibration,
+  and stabilization sensitivity are not yet complete.  Therefore this
+  milestone establishes software integration and deterministic behavior, not
+  predictive validation for blasting simulations.
 
 ## Objectivity and energy-definition diagnostics (2026-10-09)
 
@@ -97,8 +98,53 @@ bulking pressure.  A zero rate-of-deformation and a 30-degree rotation about
 the z axis are then applied.  The JH2 update preserves the unrotated stress and
 all history variables.  Peridigm's correspondence rotation routine produces
 `R sigma R^T` to a relative tolerance of `1.0e-13`.  This verifies the intended
-single-rotation call chain; it does not replace a future spatially affine
-multi-point test.
+single-rotation call chain independently of the multi-step test below.
+
+### Four-point affine compression
+
+A tetrahedral four-point neighborhood, with three independent bonds per point,
+is subjected to the homogeneous fields
+`F = diag(0.9995, 1, 1)` and `L = diag(-500, 0, 0) 1/s`.  Coordinates and
+velocities are assigned as `y = F X` and `v = L y`; the test then calls the
+complete `CorrespondenceMaterial::computeForce()` path rather than supplying
+the deformation gradient or rate-of-deformation directly.
+
+For all four points, the shape-tensor calculation recovers `F`, the velocity
+gradient recovers the prescribed unrotated rate, and JH2 returns the analytical
+elastic stress.  The deformation Jacobian is `0.9995`, damage remains zero,
+the assembled internal force is self-equilibrated, and the hourglass force
+vanishes within `1.0e-12` of the characteristic force scale.  The absolute
+tolerances for theoretical zero components are `1.0e-14` for `F` and rotation,
+`1.0e-10 1/s` for rate, and `1.0e-6 Pa` for stress.  This establishes affine
+reproduction for one homogeneous increment.
+
+### Multi-step stretch and rotation
+
+The same four-point neighborhood is advanced through the homogeneous motion
+
+`F(t) = Rz(omega*t) * diag(exp(-100*t), 1, 1)`,
+
+with `omega = 1.0e4 rad/s`.  At every increment, coordinates use `y = F X` and
+velocities use `v = (Fdot F^-1) y`.  The test performs 100 state updates with
+`dt = 1.0e-7 s`, giving a final rotation of `0.1 rad` and an axial compression
+of approximately `0.1%`.
+
+At every step and all four points, the computed deformation gradient and
+Jacobian reproduce the prescribed motion, damage remains zero, internal force
+is self-equilibrated, and affine hourglass force remains within `1.0e-12` of
+the characteristic force scale.  The computed rotation, unrotated rate,
+unrotated elastic stress, and spatially rotated stress agree with the continuum
+reference within relative tolerances of `2.0e-4`, `3.0e-4`, `3.0e-4`, and
+`5.0e-4`, respectively.
+
+An initial 10-step trial used `dt = 1.0e-6 s` while preserving the same total
+motion.  Its final errors were approximately `0.1%` in rotation, `0.11%` in
+unrotated stress, and `0.31%` in spatial stress, exceeding the intended test
+tolerances.  Refinement to 100 steps reduced the errors sufficiently for all
+checks to pass.  This behavior is consistent with time-discretization error in
+Peridigm's Flanagan--Taylor rotation update; it is not evidence of a second
+stress rotation in JH2.  A formal convergence-rate study and a plastic-regime
+counterpart remain open.
 
 ### Dissipated-energy definitions
 
@@ -116,4 +162,5 @@ selecting the alternative remains contingent on source justification and a
 multi-step sensitivity study.
 
 Both JH2 CTest targets pass after these additions.  The wrapper target now
-contains the analytical elastic update and the preloaded rigid-rotation test.
+contains the analytical elastic update, preloaded rigid rotation, and
+four-point single- and multi-increment affine-motion tests.

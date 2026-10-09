@@ -118,6 +118,10 @@ Completed in the first implementation milestone:
 - Peridigm DataManager wrapper update;
 - preloaded rigid-rotation objectivity through the Peridigm stress-rotation
   call chain;
+- four-point tetrahedral affine compression through Peridigm's shape tensor,
+  velocity-gradient, constitutive, force-state, and hourglass calculations;
+- 100-increment combined compression and rotation through the complete
+  Peridigm correspondence state-update path;
 - single-increment comparison of the Eq. (27)--(28) energy loss and the
   trapezoidal plastic-work diagnostic;
 - one- and two-process consistency for the prescribed compression example.
@@ -125,7 +129,8 @@ Completed in the first implementation milestone:
 Required before using the model for calibrated blast predictions:
 
 - an independent implementation of the complete multi-step loading path;
-- an affine-deformation test at the Peridigm level;
+- plastic-regime objectivity and formal time-step convergence under combined
+  stretch and rotation;
 - multi-step sensitivity comparison of the Eq. (27)--(28) energy loss and
   trapezoidal plastic-work alternatives;
 - coupling of material-point failure to a documented bond-failure rule;
