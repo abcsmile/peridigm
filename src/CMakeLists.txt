@@ -47,6 +47,7 @@ set(Peridigm_HEADERS
     ${apiHEADERS}
     ${ioHEADERS}
     ${materialsHEADERS}
+    ${MATERIALS_DIR}/jh2.h
     ${quickGridHEADERS}
     ${utilitiesHEADERS}
     ${pdneighHEADERS}

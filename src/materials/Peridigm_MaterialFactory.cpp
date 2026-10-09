@@ -54,6 +54,7 @@
 #include "Peridigm_ViscoelasticMaterial.hpp"
 #include "Peridigm_ElasticCorrespondenceMaterial.hpp"
 #include "Peridigm_ElasticPlasticCorrespondenceMaterial.hpp"
+#include "Peridigm_JH2CorrespondenceMaterial.hpp"
 #include "Peridigm_ViscoPlasticNeedlemanCorrespondenceMaterial.hpp"
 #include "Peridigm_IsotropicHardeningPlasticCorrespondenceMaterial.hpp"
 #include "Peridigm_ElasticHypoelasticCorrespondenceMaterial.hpp"
@@ -96,6 +97,8 @@ PeridigmNS::MaterialFactory::create(const Teuchos::ParameterList& materialParams
     materialModel = Teuchos::rcp( new ViscoelasticMaterial(materialParams) );
   else if (materialModelName == "Elastic Plastic Correspondence")
     materialModel = Teuchos::rcp( new ElasticPlasticCorrespondenceMaterial(materialParams) );
+  else if (materialModelName == "JH2 Correspondence")
+    materialModel = Teuchos::rcp( new JH2CorrespondenceMaterial(materialParams) );
   else if (materialModelName == "Elastic Correspondence")
     materialModel = Teuchos::rcp( new ElasticCorrespondenceMaterial(materialParams) );
   else if (materialModelName == "Viscoplastic Needleman Correspondence")
@@ -150,7 +153,7 @@ PeridigmNS::MaterialFactory::create(const Teuchos::ParameterList& materialParams
   else {
     std::string invalidMaterial("\n**** Unrecognized material model: ");
     invalidMaterial += materialModelName;
-    invalidMaterial += ", must be \"Elastic\" or \"Elastic Plastic\" or \"Elastic Plastic Hardening\" or \"Viscoelastic\" or \"Elastic Correspondence\" or \"LCM\" or \"Vector Poisson\".\n";
+    invalidMaterial += ", must name a material registered in Peridigm_MaterialFactory, including \"JH2 Correspondence\" for the JH2 model.\n";
     TEUCHOS_TEST_FOR_EXCEPT_MSG(true, invalidMaterial);
   }
 

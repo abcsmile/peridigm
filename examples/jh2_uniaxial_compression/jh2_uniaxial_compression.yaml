@@ -1,0 +1,81 @@
+Peridigm:
+  Discretization:
+      Type: "Exodus"
+      Input Mesh File: "../../test/verification/ElasticCorrespondenceFullyPrescribedTension/ElasticCorrespondenceFullyPrescribedTension.g"
+
+  Materials:
+      Barre Granite JH2:
+          Material Model: "JH2 Correspondence"
+          Density: 2660.0
+          Bulk Modulus: 21.9e9
+          Shear Modulus: 25.7e9
+          Hourglass Coefficient: 0.01
+          JH2 Intact Strength Constant: 1.9
+          JH2 Intact Strength Exponent: 0.62
+          JH2 Fractured Strength Constant: 0.25
+          JH2 Fractured Strength Exponent: 0.62
+          JH2 Strain Rate Coefficient: 0.005
+          JH2 Damage Constant D1: 0.005
+          JH2 Damage Exponent D2: 0.7
+          JH2 Energy Conversion Factor: 0.5
+          Pressure at HEL: 3.7e9
+          Strength at HEL: 1.2e9
+          JH2 Tensile Pressure: 54.0e6
+          JH2 Reference Strain Rate: 1.0
+          JH2 EOS K1: 21.9e9
+          JH2 EOS K2: -4500.0e9
+          JH2 EOS K3: 300000.0e9
+
+  Blocks:
+      Granite Block:
+          Block Names: "block_1 block_2 block_3"
+          Material: "Barre Granite JH2"
+          Horizon: 0.751
+
+  Boundary Conditions:
+      Fully Prescribed X:
+          Type: "Prescribed Displacement"
+          Node Set: "nodelist_1"
+          Coordinate: "x"
+          Value: "0.0"
+      Fully Prescribed Compression Y:
+          Type: "Prescribed Displacement"
+          Node Set: "nodelist_1"
+          Coordinate: "y"
+          Value: "-0.01*y*t/1.0e-6"
+      Fully Prescribed Z:
+          Type: "Prescribed Displacement"
+          Node Set: "nodelist_1"
+          Coordinate: "z"
+          Value: "0.0"
+
+  Solver:
+      Verbose: false
+      Initial Time: 0.0
+      Final Time: 1.0e-6
+      Verlet:
+          Fixed dt: 1.0e-7
+
+  Output:
+      Output File Type: "ExodusII"
+      Output Filename: "jh2_uniaxial_compression"
+      Output Frequency: 1
+      Output Variables:
+          Displacement: true
+          Velocity: true
+          Force: true
+          Deformation_Gradient: true
+          Cauchy_Stress: true
+          Unrotated_Cauchy_Stress: true
+          JH2_Damage: true
+          Equivalent_Plastic_Strain: true
+          JH2_Bulking_Pressure: true
+          JH2_Equivalent_Stress: true
+          JH2_Yield_Strength: true
+          JH2_EOS_Pressure: true
+          JH2_Equivalent_Strain_Rate: true
+          JH2_Deformation_Jacobian: true
+          JH2_Plastic_Strain_Increment: true
+          JH2_Fracture_Plastic_Strain: true
+          JH2_Dissipated_Energy: true
+          JH2_Tensile_Failure: true

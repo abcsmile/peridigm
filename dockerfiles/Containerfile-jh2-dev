@@ -1,0 +1,35 @@
+FROM docker.io/peridigm/peridigm@sha256:58b5acc40a4f2bc97dbffa783ed650953e6e65356cb0bf6706a3338eccc1a9b5 AS peridigm_runtime
+
+FROM docker.io/library/debian:bookworm-slim
+
+RUN apt-get update \
+    && apt-get install --yes --no-install-recommends \
+       build-essential \
+       cmake \
+       gfortran \
+       libblas-dev \
+       libboost-dev \
+       libcurl4-openssl-dev \
+       liblapack-dev \
+       libopenmpi-dev \
+       libyaml-cpp-dev \
+       m4 \
+       openmpi-bin \
+       python-is-python3 \
+       zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Trilinos 13.1 records the pre-glibc-2.34 linker name as an absolute path.
+# Bookworm folds libdl into libc and only ships the ABI compatibility object.
+RUN ln -s /usr/lib/x86_64-linux-gnu/libdl.so.2 \
+          /usr/lib/x86_64-linux-gnu/libdl.so
+
+COPY --from=peridigm_runtime /usr/local/hdf5 /usr/local/hdf5
+COPY --from=peridigm_runtime /usr/local/netcdf /usr/local/netcdf
+COPY --from=peridigm_runtime /usr/local/trilinos /usr/local/trilinos
+
+WORKDIR /workspace
+
+ENV LD_LIBRARY_PATH=/usr/local/netcdf/lib
+ENV OMPI_ALLOW_RUN_AS_ROOT=1
+ENV OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
